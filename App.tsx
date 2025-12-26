@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { 
-  Search, Terminal, Hash, Code, Layers, Box, Cpu, 
+import {
+  Search, Terminal, Hash, Code, Layers, Box, Cpu,
   Activity, Shield, Zap, Globe, Smartphone, Monitor, Command,
-  ChevronRight, Disc, AlertCircle, Copy, Check
+  ChevronRight, Disc, AlertCircle, Copy, Check, Maximize2, X, Minimize2
 } from 'lucide-react';
-import { CategoryType, Prompt } from './types.ts';
-import { ALL_PROMPTS, CATEGORIES_LIST } from './data.ts';
+import { CategoryType, Prompt } from './types';
+import { ALL_PROMPTS, CATEGORIES_LIST } from './data';
 
 // --- SHADER COMPONENT (WebGL) ---
 const ShaderBackground: React.FC = () => {
@@ -19,7 +19,7 @@ const ShaderBackground: React.FC = () => {
     const gl = canvas.getContext('webgl', { alpha: false });
     if (!gl) return;
 
-    // Vertex Shader (Pass through)
+    // Vertex Shader
     const vsSource = `
       attribute vec4 aVertexPosition;
       void main() {
@@ -27,14 +27,12 @@ const ShaderBackground: React.FC = () => {
       }
     `;
 
-    // Fragment Shader (Fluid Gradient based on Palette)
-    // Palette: FEDE8F (Cream), FEA993 (Peach), 7366BD (Grape), 01343A (Depth)
+    // Fragment Shader (Fluid Gradient)
     const fsSource = `
       precision mediump float;
       uniform float uTime;
       uniform vec2 uResolution;
 
-      // Color Palette
       vec3 col_cream = vec3(0.996, 0.871, 0.561);
       vec3 col_peach = vec3(0.996, 0.663, 0.576);
       vec3 col_grape = vec3(0.451, 0.400, 0.741);
@@ -44,7 +42,6 @@ const ShaderBackground: React.FC = () => {
         vec2 uv = gl_FragCoord.xy / uResolution;
         float t = uTime * 0.2;
 
-        // Abstract distortion
         float x = uv.x;
         float y = uv.y;
         
@@ -54,12 +51,10 @@ const ShaderBackground: React.FC = () => {
         
         float pattern = v1 + v2 + v3;
         
-        // Dynamic mixing
         vec3 color = mix(col_depth, col_grape, smoothstep(-2.0, 1.0, pattern));
         color = mix(color, col_peach, smoothstep(0.0, 2.0, pattern * sin(t)));
         color = mix(color, col_cream, smoothstep(1.5, 3.0, pattern));
         
-        // Add noise/grain feel in shader
         float noise = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
         color += noise * 0.05;
 
@@ -73,7 +68,6 @@ const ShaderBackground: React.FC = () => {
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error('Shader compile error:', gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
         return null;
       }
@@ -83,9 +77,9 @@ const ShaderBackground: React.FC = () => {
     const shaderProgram = gl.createProgram();
     const vs = initShader(gl, gl.VERTEX_SHADER, vsSource);
     const fs = initShader(gl, gl.FRAGMENT_SHADER, fsSource);
-    
+
     if (!shaderProgram || !vs || !fs) return;
-    
+
     gl.attachShader(shaderProgram, vs);
     gl.attachShader(shaderProgram, fs);
     gl.linkProgram(shaderProgram);
@@ -102,9 +96,7 @@ const ShaderBackground: React.FC = () => {
     const startTime = Date.now();
 
     const render = () => {
-      // Resize handling
       if (!canvas || !gl) return;
-      
       const displayWidth  = window.innerWidth;
       const displayHeight = window.innerHeight;
 
@@ -130,29 +122,26 @@ const ShaderBackground: React.FC = () => {
 
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      // Optional: Clean up WebGL resources
       gl.deleteProgram(shaderProgram);
-      gl.deleteShader(vs);
-      gl.deleteShader(fs);
     };
   }, []);
 
   return <canvas ref={canvasRef} className="fixed inset-0 -z-10" />;
 };
 
-// --- ASCII COMPONENTS ---
+// --- UPDATED ASCII ART ---
 const ASCII_LOGO = `
- ████ ██  █████╗ ███████╗ ██████╗ ██████╗ ██████╗ ███████╗██████╗ ███████╗    ██╗  ██╗██╗   ██╗██████╗ 
- ██║██ ██ ██╔══██╗██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝██╔══██╗██╔════╝    ██║  ██║██║   ██║██╔══██╗
- ██║██ ██ ███████║█████╗  ██║     ██║   ██║██║  ██║█████╗  ██████╔╝███████╗    ███████║██║   ██║██████╔╝
- ╚═╝██ ██ ██╔══██║██╔══╝  ██║     ██║   ██║██║  ██║██╔══╝  ██╔══██╗╚════██║    ██╔══██║██║   ██║██╔══██╗
- ╚═╝██ ██ ███████║███████╗╚██████╗╚██████╔╝██████╔╝███████╗██║  ██║███████║    ██║  ██║╚██████╔╝██████╔╝
-    ╚═╝ ╚═╝╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝    ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ 
+██╗   ██╗██╗██████╗ ███████╗██████╗ ███████╗██╗   ██╗███████╗
+██║   ██║██║██╔══██╗██╔════╝██╔══██╗██╔════╝██║   ██║██╔════╝
+██║   ██║██║██████╔╝█████╗  ██║  ██║█████╗  ██║   ██║███████╗
+╚██╗ ██╔╝██║██╔══██╗██╔══╝  ██║  ██║██╔══╝  ╚██╗ ██╔╝╚════██║
+ ╚████╔╝ ██║██████╔╝███████╗██████╔╝███████╗ ╚████╔╝ ███████║
+  ╚═══╝  ╚═╝╚═════╝ ╚══════╝╚═════╝ ╚══════╝  ╚═══╝  ╚══════╝
 `;
 
 const TerminalText: React.FC<{ text: string, delay?: number, speed?: number }> = ({ text, delay = 0, speed = 30 }) => {
   const [displayed, setDisplayed] = useState('');
-  
+
   useEffect(() => {
     let index = 0;
     let interval: number;
@@ -207,7 +196,7 @@ const BootScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
       "LOADING USER PROFILE...",
       "SYSTEM READY."
     ];
-    
+
     let delay = 0;
     const timeouts: number[] = [];
 
@@ -234,20 +223,20 @@ const BootScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 bg-sys-depth text-sys-cream font-mono z-[100] p-10 flex flex-col justify-end pb-20">
-      {lines.map((line, i) => (
-        <div key={i} className="text-sm md:text-lg mb-1">
-          <span className="text-sys-grape mr-2">root@vibehub:~#</span>
-          {line}
-        </div>
-      ))}
-      <div className="animate-cursor-blink w-3 h-5 bg-sys-peach mt-2"></div>
-    </div>
+      <div className="fixed inset-0 bg-sys-depth text-sys-cream font-mono z-[100] p-10 flex flex-col justify-end pb-20">
+        {lines.map((line, i) => (
+            <div key={i} className="text-sm md:text-lg mb-1">
+              <span className="text-sys-grape mr-2">root@vibehub:~#</span>
+              {line}
+            </div>
+        ))}
+        <div className="animate-cursor-blink w-3 h-5 bg-sys-peach mt-2"></div>
+      </div>
   );
 };
 
-// --- PROMPT COMPONENT ---
-const TerminalPromptCard: React.FC<{ prompt: Prompt }> = ({ prompt }) => {
+// --- PROMPT MODAL (POPUP) ---
+const PromptModal: React.FC<{ prompt: Prompt, onClose: () => void }> = ({ prompt, onClose }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -256,51 +245,123 @@ const TerminalPromptCard: React.FC<{ prompt: Prompt }> = ({ prompt }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Close on Escape key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [onClose]);
+
   return (
-    <div className="group relative border border-sys-grape/30 bg-sys-depth/80 hover:bg-sys-depth hover:border-sys-cream/50 transition-all duration-200 flex flex-col overflow-hidden">
-      {/* Header Bar */}
-      <div className="bg-sys-black/40 border-b border-sys-grape/30 p-2 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-           <div className="w-2 h-2 rounded-full bg-sys-peach/50 group-hover:bg-sys-peach"></div>
-           <span className="font-mono text-xs text-sys-cream/70 uppercase tracking-widest">{prompt.category}</span>
-        </div>
-        <div className="font-mono text-xs text-sys-grape opacity-50">ID: {prompt.id}</div>
-      </div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-sys-black/80 backdrop-blur-md animate-fade-in">
+        <div className="w-full max-w-4xl h-[85vh] bg-sys-depth border border-sys-grape shadow-2xl flex flex-col relative overflow-hidden rounded-lg">
 
-      <div className="p-5 flex-1 flex flex-col">
-        <h3 className="text-xl font-bold font-sans text-white mb-2 group-hover:text-sys-cream transition-colors">
-          {prompt.title}
-        </h3>
-        <p className="text-sm font-mono text-sys-cream/60 mb-4 leading-relaxed">
-          {prompt.description}
-        </p>
-
-        {/* Code Block Area */}
-        <div className="relative mt-auto">
-          <div className="absolute top-0 right-0 -mt-3 -mr-3">
-             <button 
-              onClick={handleCopy}
-              className={`
-                px-3 py-1 text-xs font-mono font-bold uppercase tracking-wide border flex items-center gap-1
-                transition-all duration-200
-                ${copied 
-                  ? 'bg-sys-peach text-sys-depth border-sys-peach' 
-                  : 'bg-sys-depth text-sys-grape border-sys-grape hover:text-sys-peach hover:border-sys-peach'
-                }
-              `}
-            >
-              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-              {copied ? 'EXECUTED' : 'COPY_SRC'}
+          {/* Modal Header (Terminal Bar) */}
+          <div className="h-10 bg-sys-black/60 border-b border-sys-grape/40 flex items-center justify-between px-4">
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <button onClick={onClose} className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400"></button>
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              </div>
+              <span className="ml-4 font-mono text-xs text-sys-cream/60">vim {prompt.id}.sh</span>
+            </div>
+            <button onClick={onClose} className="text-sys-grape hover:text-sys-cream transition-colors">
+              <X className="w-5 h-5" />
             </button>
           </div>
-          
-          <div className="bg-sys-black/60 border-l-2 border-sys-grape/50 p-3 font-mono text-xs text-sys-cream/80 overflow-hidden h-24 relative mt-4">
-             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-sys-black pointer-events-none"></div>
-             <pre className="whitespace-pre-wrap font-mono">{prompt.code}</pre>
+
+          {/* Modal Content */}
+          <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <CategoryIcon category={prompt.category} className="text-sys-peach w-5 h-5" />
+                <span className="font-mono text-sm text-sys-peach uppercase tracking-widest">{prompt.category}</span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{prompt.title}</h2>
+              <p className="text-sys-cream/70 font-mono leading-relaxed">{prompt.description}</p>
+
+              {/* Tags */}
+              <div className="flex gap-2 mt-4 flex-wrap">
+                {prompt.tags.map(tag => (
+                    <span key={tag} className="px-2 py-1 text-[10px] font-mono border border-sys-grape/40 rounded text-sys-cream/60 bg-sys-grape/10">
+                      #{tag}
+                    </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Code Block */}
+            <div className="relative group">
+              <div className="absolute top-4 right-4 z-10 flex gap-2">
+                <button
+                    onClick={handleCopy}
+                    className="bg-sys-peach text-sys-depth font-bold px-4 py-1.5 text-xs font-mono rounded hover:bg-white transition-colors flex items-center gap-2"
+                >
+                  {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copied ? 'COPIED' : 'COPY'}
+                </button>
+              </div>
+              <div className="bg-sys-black/80 border border-sys-grape/30 rounded p-6 overflow-x-auto min-h-[300px]">
+                <pre className="font-mono text-sm text-sys-cream/90 leading-6 whitespace-pre-wrap">{prompt.code}</pre>
+              </div>
+            </div>
+          </div>
+
+          {/* Vim Status Bar */}
+          <div className="h-6 bg-sys-grape/20 text-sys-cream/60 text-[10px] font-mono flex items-center px-4 justify-between select-none">
+            <span>NORMAL MODE</span>
+            <span>Ln 1, Col 1</span>
+          </div>
+
+        </div>
+      </div>
+  );
+};
+
+
+// --- PROMPT COMPONENT ---
+const TerminalPromptCard: React.FC<{ prompt: Prompt, onOpen: (p: Prompt) => void }> = ({ prompt, onOpen }) => {
+  return (
+      <div
+          onClick={() => onOpen(prompt)}
+          className="group relative border border-sys-grape/30 bg-sys-depth/80 hover:bg-sys-depth hover:border-sys-cream/50 transition-all duration-200 flex flex-col overflow-hidden cursor-pointer h-full"
+      >
+        {/* Header Bar */}
+        <div className="bg-sys-black/40 border-b border-sys-grape/30 p-2 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-sys-peach/50 group-hover:bg-sys-peach"></div>
+            <span className="font-mono text-xs text-sys-cream/70 uppercase tracking-widest">{prompt.category}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Maximize2 className="w-3 h-3 text-sys-grape group-hover:text-sys-cream" />
+          </div>
+        </div>
+
+        <div className="p-5 flex-1 flex flex-col relative">
+          <h3 className="text-lg md:text-xl font-bold font-sans text-white mb-2 group-hover:text-sys-cream transition-colors line-clamp-2">
+            {prompt.title}
+          </h3>
+          <p className="text-sm font-mono text-sys-cream/60 mb-4 leading-relaxed line-clamp-2">
+            {prompt.description}
+          </p>
+
+          {/* Code Preview Area (Truncated) */}
+          <div className="relative mt-auto">
+            <div className="bg-sys-black/60 border-l-2 border-sys-grape/50 p-3 font-mono text-xs text-sys-cream/80 overflow-hidden h-28 relative mt-2 group-hover:border-sys-peach transition-colors">
+              {/* Gradient Fade for overflow */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-sys-black/90 pointer-events-none flex items-end justify-center pb-2">
+               <span className="text-[10px] text-sys-grape uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                 [CLICK TO EXPAND]
+               </span>
+              </div>
+              <pre className="whitespace-pre-wrap font-mono opacity-70">{prompt.code.slice(0, 300)}...</pre>
+            </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
@@ -309,15 +370,16 @@ const App: React.FC = () => {
   const [booted, setBooted] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<CategoryType | 'All'>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  
+  const [activePrompt, setActivePrompt] = useState<Prompt | null>(null);
+
   // Filter logic
   const filteredPrompts = useMemo(() => {
     return ALL_PROMPTS.filter(p => {
       const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
-      const matchesSearch = 
-        p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch =
+          p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.category.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
   }, [selectedCategory, searchQuery]);
@@ -327,130 +389,138 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen relative font-sans text-sys-cream selection:bg-sys-peach selection:text-sys-depth">
-      {/* Global Effects */}
-      <ShaderBackground />
-      <div className="bg-noise"></div>
-      <div className="scanlines"></div>
+      <div className="min-h-screen relative font-sans text-sys-cream selection:bg-sys-peach selection:text-sys-depth">
+        {/* Global Effects */}
+        <ShaderBackground />
+        <div className="bg-noise"></div>
+        <div className="scanlines"></div>
 
-      {/* Top System Bar */}
-      <nav className="sticky top-0 z-40 border-b border-sys-grape/40 term-panel h-14 flex items-center justify-between px-4 md:px-8">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setSelectedCategory('All')}>
-             <Terminal className="w-5 h-5 text-sys-peach" />
-             <span className="font-mono font-bold tracking-tighter text-lg text-white group-hover:text-sys-cream transition-colors">
+        {activePrompt && (
+            <PromptModal prompt={activePrompt} onClose={() => setActivePrompt(null)} />
+        )}
+
+        {/* Top System Bar */}
+        <nav className="sticky top-0 z-40 border-b border-sys-grape/40 term-panel h-14 flex items-center justify-between px-4 md:px-8">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setSelectedCategory('All')}>
+              <Terminal className="w-5 h-5 text-sys-peach" />
+              <span className="font-mono font-bold tracking-tighter text-lg text-white group-hover:text-sys-cream transition-colors">
                VIBE<span className="text-sys-grape">CODERS</span>_HUB
              </span>
+            </div>
+            <div className="hidden md:flex items-center px-2 py-0.5 bg-sys-peach/10 border border-sys-peach/30 rounded text-[10px] font-mono text-sys-peach tracking-widest animate-pulse">
+              SYSTEM ONLINE
+            </div>
           </div>
-          <div className="hidden md:flex items-center px-2 py-0.5 bg-sys-peach/10 border border-sys-peach/30 rounded text-[10px] font-mono text-sys-peach tracking-widest animate-pulse">
-            SYSTEM ONLINE
+
+          <div className="flex items-center gap-4">
+            {/* Search Input */}
+            <div className="relative group">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-sys-grape">{'>'}</span>
+              <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="grep prompt..."
+                  className="bg-sys-black/50 border border-sys-grape/30 text-sm font-mono py-1.5 pl-8 pr-4 w-48 md:w-64 focus:outline-none focus:border-sys-peach focus:w-72 transition-all placeholder-sys-cream/30 text-sys-cream"
+              />
+            </div>
+
+            <a href="#" className="hidden md:block font-mono text-xs text-sys-grape hover:text-sys-cream transition-colors hover:underline decoration-sys-peach underline-offset-4">
+              [MANUAL]
+            </a>
           </div>
-        </div>
+        </nav>
 
-        <div className="flex items-center gap-4">
-           {/* Search Input */}
-           <div className="relative group">
-             <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-sys-grape">{'>'}</span>
-             <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="grep prompt..."
-                className="bg-sys-black/50 border border-sys-grape/30 text-sm font-mono py-1.5 pl-8 pr-4 w-48 md:w-64 focus:outline-none focus:border-sys-peach focus:w-72 transition-all placeholder-sys-cream/30 text-sys-cream"
-             />
-           </div>
-           
-           <a href="#" className="hidden md:block font-mono text-xs text-sys-grape hover:text-sys-cream transition-colors hover:underline decoration-sys-peach underline-offset-4">
-             [MANUAL]
-           </a>
-        </div>
-      </nav>
+        <div className="flex flex-col md:flex-row min-h-[calc(100vh-56px)]">
 
-      <div className="flex flex-col md:flex-row min-h-[calc(100vh-56px)]">
-        
-        {/* Sidebar / Directory Tree */}
-        <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-sys-grape/30 bg-sys-black/20 backdrop-blur-sm p-4 overflow-y-auto h-auto md:h-[calc(100vh-56px)] md:sticky md:top-14">
-           <div className="font-mono text-xs text-sys-grape mb-4 uppercase tracking-widest pl-2">// DIRECTORY</div>
-           
-           <div className="space-y-1">
-             <button
-               onClick={() => setSelectedCategory('All')}
-               className={`
+          {/* Sidebar / Directory Tree */}
+          <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-sys-grape/30 bg-sys-black/20 backdrop-blur-sm p-4 overflow-y-auto h-auto md:h-[calc(100vh-56px)] md:sticky md:top-14 custom-scrollbar">
+            <div className="font-mono text-xs text-sys-grape mb-4 uppercase tracking-widest pl-2">// DIRECTORY</div>
+
+            <div className="space-y-1">
+              <button
+                  onClick={() => setSelectedCategory('All')}
+                  className={`
                  w-full text-left px-3 py-2 font-mono text-sm flex items-center gap-3 transition-all
-                 ${selectedCategory === 'All' 
-                   ? 'bg-sys-peach/20 text-sys-peach border-r-2 border-sys-peach' 
-                   : 'text-sys-cream/60 hover:text-sys-cream hover:bg-sys-cream/5'
-                 }
-               `}
-             >
-               <Command className="w-4 h-4" />
-               <span>./all_files</span>
-             </button>
-
-             {CATEGORIES_LIST.map(cat => (
-               <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`
-                  w-full text-left px-3 py-2 font-mono text-sm flex items-center gap-3 transition-all group
-                  ${selectedCategory === cat 
-                    ? 'bg-sys-grape/20 text-sys-cream border-r-2 border-sys-grape' 
-                    : 'text-sys-cream/60 hover:text-sys-cream hover:bg-sys-cream/5'
+                 ${selectedCategory === 'All'
+                      ? 'bg-sys-peach/20 text-sys-peach border-r-2 border-sys-peach'
+                      : 'text-sys-cream/60 hover:text-sys-cream hover:bg-sys-cream/5'
                   }
+               `}
+              >
+                <Command className="w-4 h-4" />
+                <span>./all_files</span>
+              </button>
+
+              {CATEGORIES_LIST.map(cat => (
+                  <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`
+                  w-full text-left px-3 py-2 font-mono text-sm flex items-center gap-3 transition-all group
+                  ${selectedCategory === cat
+                          ? 'bg-sys-grape/20 text-sys-cream border-r-2 border-sys-grape'
+                          : 'text-sys-cream/60 hover:text-sys-cream hover:bg-sys-cream/5'
+                      }
                 `}
-               >
+                  >
                  <span className={`${selectedCategory === cat ? 'text-sys-cream' : 'text-sys-grape group-hover:text-sys-peach'}`}>
                    <CategoryIcon category={cat} />
                  </span>
-                 <span className="truncate">{cat.toLowerCase().replace(/\s/g, '_')}</span>
-               </button>
-             ))}
-           </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <main className="flex-1 p-6 md:p-10 overflow-y-auto">
-          
-          {/* Hero / Header in Main Area */}
-          <header className="mb-12">
-            {selectedCategory === 'All' && (
-              <div className="hidden md:block text-[8px] lg:text-[10px] leading-[8px] lg:leading-[10px] font-mono text-sys-grape mb-8 whitespace-pre opacity-80 select-none">
-                 {ASCII_LOGO}
-              </div>
-            )}
-            
-            <div className="flex items-end gap-4 border-b border-sys-grape/30 pb-4">
-              <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight">
-                <TerminalText text={selectedCategory === 'All' ? 'ROOT_ACCESS' : selectedCategory.toUpperCase()} />
-              </h1>
-              <span className="font-mono text-sys-peach text-sm mb-1 animate-pulse">
-                {selectedCategory === 'All' ? ' // FULL_ACCESS_GRANTED' : ' // SUB_DIRECTORY_MOUNTED'}
-              </span>
-            </div>
-            <div className="mt-2 font-mono text-xs text-sys-cream/50">
-              Files found: {filteredPrompts.length} objects
-            </div>
-          </header>
-
-          {/* Grid */}
-          {filteredPrompts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
-              {filteredPrompts.map(prompt => (
-                <TerminalPromptCard key={prompt.id} prompt={prompt} />
+                    <span className="truncate">{cat.toLowerCase().replace(/\s/g, '_')}</span>
+                  </button>
               ))}
             </div>
-          ) : (
-            <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-sys-grape/30 rounded bg-sys-black/20">
-              <AlertCircle className="w-12 h-12 text-sys-grape mb-4" />
-              <h2 className="text-xl font-mono text-sys-cream mb-2">ERROR 404: NULL_POINTER</h2>
-              <p className="font-mono text-sys-cream/50 text-sm">Query returned no results. Check syntax.</p>
-            </div>
-          )}
+          </aside>
 
-        </main>
+          {/* Main Content Area */}
+          <main className="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar">
+
+            {/* Hero / Header in Main Area */}
+            <header className="mb-12">
+              {selectedCategory === 'All' && (
+                  <div className="hidden md:block text-[6px] md:text-[8px] lg:text-[10px] leading-[8px] lg:leading-[11px] font-mono text-sys-grape mb-8 whitespace-pre opacity-80 select-none overflow-x-hidden">
+                    {ASCII_LOGO}
+                  </div>
+              )}
+
+              <div className="flex items-end gap-4 border-b border-sys-grape/30 pb-4">
+                <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight">
+                  <TerminalText text={selectedCategory === 'All' ? 'ROOT_ACCESS' : selectedCategory.toUpperCase()} />
+                </h1>
+                <span className="font-mono text-sys-peach text-sm mb-1 animate-pulse">
+                {selectedCategory === 'All' ? ' // FULL_ACCESS_GRANTED' : ' // SUB_DIRECTORY_MOUNTED'}
+              </span>
+              </div>
+              <div className="mt-2 font-mono text-xs text-sys-cream/50">
+                Files found: {filteredPrompts.length} objects
+              </div>
+            </header>
+
+            {/* Grid */}
+            {filteredPrompts.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
+                  {filteredPrompts.map(prompt => (
+                      <TerminalPromptCard
+                          key={prompt.id}
+                          prompt={prompt}
+                          onOpen={setActivePrompt}
+                      />
+                  ))}
+                </div>
+            ) : (
+                <div className="h-64 flex flex-col items-center justify-center border-2 border-dashed border-sys-grape/30 rounded bg-sys-black/20">
+                  <AlertCircle className="w-12 h-12 text-sys-grape mb-4" />
+                  <h2 className="text-xl font-mono text-sys-cream mb-2">ERROR 404: NULL_POINTER</h2>
+                  <p className="font-mono text-sys-cream/50 text-sm">Query returned no results. Check syntax.</p>
+                </div>
+            )}
+
+          </main>
+        </div>
+
       </div>
-      
-    </div>
   );
 };
 

@@ -1,150 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VibeCoders Hub</title>
-    
-    <!-- Google Fonts: Ubuntu (Modern Sans) and JetBrains Mono (Coding) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VibeCoders Hub</title>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Custom Tailwind Configuration -->
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              // User specified palette
-              sys: {
-                cream: '#FEDE8F',
-                peach: '#FEA993',
-                grape: '#7366BD',
-                depth: '#01343A',
-                black: '#050508',
-              }
-            },
-            fontFamily: {
-              sans: ['Ubuntu', 'sans-serif'],
-              mono: ['JetBrains Mono', 'monospace'],
-            },
-            animation: {
-              'cursor-blink': 'blink 1s step-end infinite',
-              'scanline': 'scanline 8s linear infinite',
-              'glitch': 'glitch 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite',
-            },
-            keyframes: {
-              blink: {
-                '0%, 100%': { opacity: '1' },
-                '50%': { opacity: '0' },
-              },
-              scanline: {
-                '0%': { transform: 'translateY(-100%)' },
-                '100%': { transform: 'translateY(100%)' }
-              },
-              glitch: {
-                '0%': { transform: 'translate(0)' },
-                '20%': { transform: 'translate(-2px, 2px)' },
-                '40%': { transform: 'translate(-2px, -2px)' },
-                '60%': { transform: 'translate(2px, 2px)' },
-                '80%': { transform: 'translate(2px, -2px)' },
-                '100%': { transform: 'translate(0)' }
-              }
+  <!-- Google Fonts: Ubuntu (Modern Sans) and JetBrains Mono (Coding) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            // User specified palette
+            sys: {
+              cream: '#FEDE8F',
+              peach: '#FEA993',
+              grape: '#7366BD',
+              depth: '#01343A',
+              black: '#050508',
             }
           },
+          fontFamily: {
+            sans: ['Ubuntu', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          animation: {
+            'cursor-blink': 'blink 1s step-end infinite',
+            'scanline': 'scanline 8s linear infinite',
+            'glitch': 'glitch 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite',
+          },
+          keyframes: {
+            blink: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0' },
+            },
+            scanline: {
+              '0%': { transform: 'translateY(-100%)' },
+              '100%': { transform: 'translateY(100%)' }
+            },
+            glitch: {
+              '0%': { transform: 'translate(0)' },
+              '20%': { transform: 'translate(-2px, 2px)' },
+              '40%': { transform: 'translate(-2px, -2px)' },
+              '60%': { transform: 'translate(2px, 2px)' },
+              '80%': { transform: 'translate(2px, -2px)' },
+              '100%': { transform: 'translate(0)' }
+            }
+          }
         },
-      }
-    </script>
+      },
+    }
+  </script>
 
-    <style>
-      /* Reset & Base */
-      body {
-        margin: 0;
-        padding: 0;
-        background-color: #01343A; /* Fallback to sys-depth */
-        color: #FEDE8F;
-        overflow-x: hidden;
-      }
+  <style>
+    /* Reset & Base */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #01343A; /* Fallback to sys-depth */
+      color: #FEDE8F;
+      overflow-x: hidden;
+    }
 
-      /* Custom Scrollbar (Terminal Style) */
-      ::-webkit-scrollbar {
-        width: 10px;
-        background: #01343A;
-        border-left: 1px solid rgba(115, 102, 189, 0.2);
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #7366BD;
-        border: 2px solid #01343A;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #FEA993;
-      }
+    /* Custom Scrollbar (Terminal Style) */
+    ::-webkit-scrollbar {
+      width: 10px;
+      background: #01343A;
+      border-left: 1px solid rgba(115, 102, 189, 0.2);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #7366BD;
+      border: 2px solid #01343A;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #FEA993;
+    }
 
-      /* Noise Texture Utility */
-      .bg-noise {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        pointer-events: none;
-        z-index: 50;
-        opacity: 0.07;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
-      }
+    /* Noise Texture Utility */
+    .bg-noise {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.07;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+    }
 
-      /* CRT Scanline Effect */
-      .scanlines {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        pointer-events: none;
-        z-index: 51;
-        background: linear-gradient(
-          to bottom,
-          rgba(255,255,255,0),
-          rgba(255,255,255,0) 50%,
-          rgba(0,0,0,0.1) 50%,
-          rgba(0,0,0,0.1)
-        );
-        background-size: 100% 4px;
-      }
+    /* CRT Scanline Effect */
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 51;
+      background: linear-gradient(
+              to bottom,
+              rgba(255,255,255,0),
+              rgba(255,255,255,0) 50%,
+              rgba(0,0,0,0.1) 50%,
+              rgba(0,0,0,0.1)
+      );
+      background-size: 100% 4px;
+    }
 
-      /* Selection */
-      ::selection {
-        background: #FEA993;
-        color: #01343A;
-      }
+    /* Selection */
+    ::selection {
+      background: #FEA993;
+      color: #01343A;
+    }
 
-      /* Utility for glass/terminal panels */
-      .term-panel {
-        background: rgba(1, 52, 58, 0.75);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(115, 102, 189, 0.3);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-      }
-    </style>
+    /* Utility for glass/terminal panels */
+    .term-panel {
+      background: rgba(1, 52, 58, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(115, 102, 189, 0.3);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    }
+  </style>
   <script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
+    {
+      "imports": {
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "react": "https://esm.sh/react@^19.2.3",
+        "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+      }
+    }
+  </script>
 </head>
-  <body>
-    <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
+<body>
+<div id="root"></div>
 </body>
 </html>
+
+const ASCII_LOGO = `
+████ ██  █████╗ ███████╗ ██████╗ ██████╗ ██████╗ ███████╗██████╗ ███████╗    ██╗  ██╗██╗   ██╗██████╗
+██║██ ██ ██╔══██╗██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝██╔══██╗██╔════╝    ██║  ██║██║   ██║██╔══██╗
+██║██ ██ ███████║█████╗  ██║     ██║   ██║██║  ██║█████╗  ██████╔╝███████╗    ███████║██║   ██║██████╔╝
+╚═╝██ ██ ██╔══██║██╔══╝  ██║     ██║   ██║██║  ██║██╔══╝  ██╔══██╗╚════██║    ██╔══██║██║   ██║██╔══██╗
+╚═╝██ ██ ███████║███████╗╚██████╗╚██████╔╝██████╔╝███████╗██║  ██║███████║    ██║  ██║╚██████╔╝██████╔╝
+╚═╝ ╚═╝╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝    ╚═╝  ╚═╝ ╚═════╝ ╚═════╝
+`;
